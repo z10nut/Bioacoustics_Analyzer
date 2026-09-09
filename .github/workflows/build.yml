@@ -17,11 +17,13 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    - name: Setup Miniconda
+      uses: conda-incubator/setup-miniconda@v3
       with:
+        auto-update-conda: true
         python-version: '3.11'
-        cache: 'pip'
+        activate-environment: build_env
+        auto-activate-base: false
 
     - name: Install System Dependencies (Linux only)
       if: runner.os == 'Linux'
@@ -29,13 +31,14 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y libportaudio2 libqt6svg6 libgl1 libegl1
 
-    - name: Install Python Dependencies
+    - name: Install Dependencies
+      shell: bash -el {0}
       run: |
-        python -m pip install --upgrade pip
+        conda install -c conda-forge scikit-learn pyinstaller scipy -y
         pip install -r requirements.txt
-        pip install pyinstaller
 
     - name: Build with PyInstaller
+      shell: bash -el {0}
       run: python build_app.py
 
     - name: Upload Artifacts
