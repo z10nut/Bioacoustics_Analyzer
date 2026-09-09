@@ -1,6 +1,5 @@
 import os
 import shutil
-import sklearn
 import subprocess
 import sys
 
@@ -26,18 +25,21 @@ args = [
 print("Running PyInstaller...")
 subprocess.run(args, check=True)
 
-print("PyInstaller finished. Applying manual patch for scikit-learn DLLs...")
+print("PyInstaller finished. Applying patch for scikit-learn DLLs...")
 
 if os.name == 'nt':
-    sklearn_dir = os.path.dirname(sklearn.__file__)
-    sklearn_libs_src = os.path.join(sklearn_dir, '.libs')
-    dest_dir = os.path.join('dist', 'BioacousticsAnalyzer', '_internal', 'sklearn', '.libs')
+    internal_dir = os.path.join('dist', 'BioacousticsAnalyzer', '_internal')
+    sklearn_libs_dest = os.path.join(internal_dir, 'sklearn', '.libs')
     
-    if os.path.exists(sklearn_libs_src):
-        if os.path.exists(dest_dir):
-            shutil.rmtree(dest_dir)
-            
-        shutil.copytree(sklearn_libs_src, dest_dir)
-        print(f"SUCCESS: Copied content from {sklearn_libs_src} to {dest_dir}")
-    else:
-        print(f"WARNING: Source folder {sklearn_libs_src} not found on this system!")
+    os.makedirs(sklearn_libs_dest, exist_ok=True)
+    
+    msvcp_src = os.path.join(internal_dir, 'msvcp140.dll')
+    msvcp140_1_src = os.path.join(internal_dir, 'msvcp140_1.dll')
+    
+    if os.path.exists(msvcp_src):
+        shutil.copy(msvcp_src, sklearn_libs_dest)
+        print("SUCCESS: Copied msvcp140.dll to sklearn/.libs")
+        
+    if os.path.exists(msvcp140_1_src):
+        shutil.copy(msvcp140_1_src, sklearn_libs_dest)
+        print("SUCCESS: Copied msvcp140_1.dll to sklearn/.libs")
