@@ -37,7 +37,7 @@ jobs:
 
     - name: Build with PyInstaller
       run: |
-        pyinstaller --name "BioacousticsAnalyzer" --windowed --onedir main.py
+        pyinstaller --name "BioacousticsAnalyzer" --windowed --onedir --collect-all sklearn --collect-all librosa --collect-all scipy main.py
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
