@@ -5,3 +5,7 @@ soundfile
 numpy
 scipy
 librosa
+pandas
+scikit-learn
+tensorflow-hub
+tf-keras
