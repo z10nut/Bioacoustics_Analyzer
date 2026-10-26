@@ -1,0 +1,11 @@
+PyQt6
+pyqtgraph
+sounddevice
+soundfile
+numpy
+scipy
+librosa
+pandas
+scikit-learn
+tensorflow-hub
+tf-keras

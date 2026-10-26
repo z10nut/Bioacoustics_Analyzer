@@ -1,0 +1,56 @@
+name: Build Bioacoustics Executables
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Miniconda
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        auto-update-conda: true
+        python-version: '3.11'
+        activate-environment: build_env
+        auto-activate-base: false
+
+    - name: Install System Dependencies (Linux only)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libportaudio2 libqt6svg6 libgl1 libegl1
+
+    - name: Install Dependencies
+      shell: bash -el {0}
+      run: |
+        conda install -c conda-forge scikit-learn pyinstaller scipy -y
+        pip install -r requirements.txt
+
+    - name: Build with PyInstaller
+      shell: bash -el {0}
+      run: python build_app.py
+
+    - name: Upload Artifact (Windows & Linux)
+      if: runner.os != 'macOS'
+      uses: actions/upload-artifact@v4
+      with:
+        name: BioacousticsAnalyzer-${{ matrix.os }}
+        path: dist/BioacousticsAnalyzer
+
+    - name: Upload Artifact (macOS)
+      if: runner.os == 'macOS'
+      uses: actions/upload-artifact@v4
+      with:
+        name: BioacousticsAnalyzer-${{ matrix.os }}
+        path: dist/BioacousticsAnalyzer.app
